@@ -1,5 +1,5 @@
 #include <iostream>
-#include "tools/io.hpp"
+#include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
 
 int main(void)
