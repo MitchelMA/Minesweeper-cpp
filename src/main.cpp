@@ -1,8 +1,10 @@
 #include <iostream>
 #include "io/io.hpp"
+#include "ansi/ansi.hpp"
 
 int main(void)
 {
+    ansi::enable_ansi();
     io::console_input.init();
     std::cout << "Hello, World!" << std::endl;
 
@@ -12,7 +14,9 @@ int main(void)
     {
         if(input.special) 
         {
-            std::cout << "special-value: " << input.value << std::endl; 
+            std::cout << CSI"31m";
+            std::cout << "special-value: " << input.value;
+            std::cout << CSI"m" << std::endl;
             continue;
         }
 
@@ -23,5 +27,6 @@ int main(void)
     }
 
     io::console_input.restore();
+    ansi::disable_ansi();
     return EXIT_SUCCESS;
 }
