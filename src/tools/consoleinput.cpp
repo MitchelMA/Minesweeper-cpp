@@ -87,9 +87,9 @@ namespace io
     ConsoleInput::get_input()
     noexcept
     {
-        int key = -1;
+        int key = KEYCODE_UNSET;
         bool special = get_key(key);
-        last_value_ = {.value = key, .special = special};
+        last_value_ = {key, special};
         return last_value_;
     }
 
@@ -98,6 +98,15 @@ namespace io
     const noexcept
     {
         return last_value_;
+    }
+
+    const ConsoleInputValue&
+    ConsoleInput::operator>>(
+        ConsoleInputValue& out
+    ) noexcept
+    {
+        out = get_input();
+        return out;
     }
 
 } // namespace io
@@ -112,7 +121,7 @@ noexcept
 
     int c = 0;
     c = _getch();
-    if(c && c != 0xE0)
+    if(c && (c != 0xE0 && c != 0))
     {
         key = c;
         return false;

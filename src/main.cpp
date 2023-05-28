@@ -10,7 +10,7 @@ int main(void)
 
     io::ConsoleInputValue input;
 
-    while((input = io::console_input.get_input()) != io::key_esc)
+    while((io::console_input >> input) != io::key_esc)
     {
         if(input.special) 
         {

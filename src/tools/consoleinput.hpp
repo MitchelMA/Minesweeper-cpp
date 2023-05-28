@@ -29,6 +29,8 @@ namespace io
 
         ConsoleInputValue get_input() noexcept;
         ConsoleInputValue get_last_input() const noexcept;
+
+        const ConsoleInputValue& operator >> (ConsoleInputValue& out) noexcept;
     };
 
     static ConsoleInput console_input;
