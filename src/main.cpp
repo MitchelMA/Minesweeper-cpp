@@ -1,6 +1,6 @@
 #include <iostream>
-#include "io/io.hpp"
-#include "ansi/ansi.hpp"
+#include "tools/io.hpp"
+#include "tools/ansi.hpp"
 
 int main(void)
 {
@@ -14,9 +14,9 @@ int main(void)
     {
         if(input.special) 
         {
-            std::cout << CSI"31m";
+            std::cout << CSI_S"31m";
             std::cout << "special-value: " << input.value;
-            std::cout << CSI"m" << std::endl;
+            std::cout << CSI_S"m" << std::endl;
             continue;
         }
 

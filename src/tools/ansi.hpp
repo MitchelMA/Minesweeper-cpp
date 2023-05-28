@@ -1,7 +1,8 @@
 #ifndef _ANSI_HPP
 #define _ANSI_HPP
 
-#define CSI "\x1b["
+#define ESC_S "\x1b"
+#define CSI_S ESC_S"["
 
 namespace ansi
 {

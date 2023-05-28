@@ -58,7 +58,7 @@ namespace io
         const int& other
     ) const noexcept
     {
-        return (*this == other);
+        return !(*this == other);
     }
 
     void
