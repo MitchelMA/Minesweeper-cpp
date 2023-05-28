@@ -1,0 +1,14 @@
+file(GLOB IO_LEVEL_SOURCES *.cpp)
+file(GLOB IO_LEVEL_HEADERS *.hpp *.h)
+
+add_library(io "")
+
+target_sources(io
+    PRIVATE
+    ${IO_LEVEL_SOURCES}
+    PUBLIC
+    ${IO_LEVEL_HEADERS})
+
+target_include_directories(io
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR})
