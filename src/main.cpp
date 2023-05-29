@@ -1,6 +1,7 @@
 #include <iostream>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
+#include "field/cell.hpp"
 
 int main(void)
 {
