@@ -12,10 +12,11 @@ namespace tools
     struct Result
     {
     private:
-        const bool is_failure_;
-        bool is_used_ = false;
         TValue value_;
         std::unique_ptr<std::exception> failure_;
+
+        const bool is_failure_;
+        bool is_used_ = false;
 
         auto throw_used() const -> void { 
             throw std::exception("Tried to access an already consumed result");
@@ -51,6 +52,48 @@ namespace tools
     };
 
     #include "result.ipp"
+
+    template <typename TValue>
+    struct Result<std::unique_ptr<TValue>>
+    {
+    private:
+        std::unique_ptr<TValue> value_;
+        std::unique_ptr<std::exception> failure_;
+        const bool is_failure_;
+        bool is_used = false;
+
+        auto throw_used() const -> void {
+            throw std::exception("Tried to access an already consumed result");
+        }
+    
+    public:
+        Result(std::unique_ptr<TValue> value) noexcept;
+        Result(std::exception* exc) noexcept :
+            value_{},
+            failure_(std::unique_ptr<std::exception>(exc)),
+            is_failure_(true) {};
+        Result(const Result<std::unique_ptr<TValue>>& other) noexcept;
+        Result(Result<std::unique_ptr<TValue>>& other) noexcept;
+        ~Result() noexcept {};
+
+        constexpr bool match(
+            std::function<void(std::unique_ptr<TValue>)> success,
+            std::function<void(const std::exception*)> failure
+        );
+        constexpr bool match(
+            std::function<void(TValue*)> success,
+            std::function<void(const std::exception*)> failure
+        );
+        constexpr bool match_r(
+            std::function<void(TValue*)> success,
+            std::function<void(const std::exception*)> failure
+        );
+
+        std::unique_ptr<TValue> unpack();
+        TValue* unpack_n() const;
+        TValue* unpack_r();
+        constexpr bool success_status() const;
+    };
 
 } // namespace tools
 
