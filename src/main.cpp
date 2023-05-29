@@ -1,7 +1,9 @@
+#include <exception>
 #include <iostream>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
 #include "field/cell.hpp"
+#include "tools/Result/result.hpp"
 
 int main(void)
 {
@@ -26,6 +28,14 @@ int main(void)
         << " (" << (char)input.value << ")" 
         << std::endl;
     }
+
+    tools::Result<int> my_res = {25};
+
+    my_res.match(
+        [](auto value) { std:: cout << value << std::endl; },
+        [](auto exception) { std::cerr << exception->what() << std::endl; }
+    );
+    
 
     io::console_input.restore();
     ansi::disable_ansi();
