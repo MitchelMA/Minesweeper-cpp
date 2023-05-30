@@ -2,38 +2,31 @@
 
 namespace field
 {
-
-    struct Cell
-    {
-        std::uint32_t value_ : 3;
-        std::uint32_t neighbours_ : 4;
-    };
-
     union conversion {
         Cell c;
         byte b;
     };
 
-    byte celltb(Cell cell)
+    Cell::Cell(byte byte)
+    noexcept
     {
-        conversion c = {.c = cell};
+        conversion c = {.b = byte};
+        *this = c.c;
+    }
+
+    byte
+    Cell::to_byte()
+    const noexcept
+    {
+        conversion c = {.c = *this};
         return c.b;
     }
 
-    Cell bytetc(byte byte)
+    bool
+    Cell::is_flag(std::uint32_t flag)
+    const noexcept
     {
-        conversion c = {.b = byte};
-        return c.c;
-    }
-
-    bool cell_is(const Cell& cell, std::uint32_t flag)
-    {
-        return cell.value_ & flag;
-    }
-
-    std::uint32_t cell_n(const Cell& cell)
-    {
-        return cell.neighbours_;
+        return value_ & flag;
     }
 
 } // namespace field

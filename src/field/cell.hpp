@@ -10,15 +10,21 @@ namespace field
     constexpr std::uint32_t cell_bomb    = 0x0002;
     constexpr std::uint32_t cell_flagged = 0x0003;
 
-
     using byte = unsigned char;
 
-    struct Cell;
+    struct Cell
+    {
+        std::uint32_t value_ : 3;
+        std::uint32_t neighbours_ : 4;
 
-    byte celltb(Cell);
-    Cell bytetc(byte);
-    bool cell_is(const Cell& cell, std::uint32_t flag);
-    std::uint32_t cell_n(const Cell& cell);
+        Cell() = default;
+        Cell(std::uint32_t value, std::uint32_t neighbours) noexcept :
+            value_(value), neighbours_(neighbours) {};
+        Cell(byte value) noexcept;
+
+        byte to_byte() const noexcept;
+        bool is_flag(std::uint32_t flag) const noexcept;
+    };
 
 } // namespace field
 

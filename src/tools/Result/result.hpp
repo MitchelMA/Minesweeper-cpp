@@ -12,11 +12,11 @@ namespace tools
     struct Result
     {
     private:
-        TValue value_;
-        std::unique_ptr<std::exception> failure_;
-
         const bool is_failure_;
         bool is_used_ = false;
+
+        TValue value_;
+        std::unique_ptr<std::exception> failure_;
 
         auto throw_used() const -> void { 
             throw std::exception("Tried to access an already consumed result");
@@ -33,18 +33,18 @@ namespace tools
             value_{},
             failure_(std::unique_ptr<std::exception>(exc)),
             is_failure_(true) {};
-        Result(const Result<TValue>& other) noexcept;
-        Result(Result<TValue>& other) noexcept;
+        Result(const Result<TValue>& other);
+        Result(Result<TValue>& other);
         ~Result() noexcept {};
 
         constexpr bool match(
             std::function<void(TValue&&)> success,
             std::function<void(const std::exception*)> failure
-        ) noexcept;
+        );
         constexpr bool match(
             std::function<void(const TValue&&)> success,
             std::function<void(const std::exception*)> failure
-        ) const noexcept;
+        ) const;
 
         TValue& unpack();
         const TValue& unpack() const;
@@ -57,10 +57,11 @@ namespace tools
     struct Result<std::unique_ptr<TValue>>
     {
     private:
+        const bool is_failure_;
+        bool is_used_ = false;
+
         std::unique_ptr<TValue> value_;
         std::unique_ptr<std::exception> failure_;
-        const bool is_failure_;
-        bool is_used = false;
 
         auto throw_used() const -> void {
             throw std::exception("Tried to access an already consumed result");
@@ -72,8 +73,8 @@ namespace tools
             value_{},
             failure_(std::unique_ptr<std::exception>(exc)),
             is_failure_(true) {};
-        Result(const Result<std::unique_ptr<TValue>>& other) noexcept;
-        Result(Result<std::unique_ptr<TValue>>& other) noexcept;
+        Result(const Result<std::unique_ptr<TValue>>& other);
+        Result(Result<std::unique_ptr<TValue>>& other);
         ~Result() noexcept {};
 
         constexpr bool match(
@@ -83,7 +84,7 @@ namespace tools
         constexpr bool match(
             std::function<void(TValue*)> success,
             std::function<void(const std::exception*)> failure
-        );
+        ) const;
         constexpr bool match_r(
             std::function<void(TValue*)> success,
             std::function<void(const std::exception*)> failure
@@ -92,8 +93,10 @@ namespace tools
         std::unique_ptr<TValue> unpack();
         TValue* unpack_n() const;
         TValue* unpack_r();
-        constexpr bool success_status() const;
+        constexpr bool success_status() const noexcept;
     };
+
+    #include "result_up.ipp"
 
 } // namespace tools
 
