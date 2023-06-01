@@ -1,15 +1,17 @@
 #include "dirio.hpp"
-
-#include <Shlwapi.h>
-#include <stdlib.h>
-#pragma comment(lib, "shlwapi.lib")
-
 #include <cstdlib>
 
-#if defined(__linux__)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+
+    #include <Shlwapi.h>
+    #pragma comment(lib, "shlwapi.lib")
+
+#elif defined(__linux__)
+
     #include <libgen.h>
     #include <unistd.h>
-#endif // linux-check
+
+#endif // os-check
 
 char* GetExcecutableDir(char* dest, std::size_t dest_size);
 
