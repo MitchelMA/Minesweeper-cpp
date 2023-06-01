@@ -1,12 +1,15 @@
 #include <iostream>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
+#include "tools/dirio.hpp"
 
 int main(void)
 {
     ansi::enable_ansi();
     io::console_input.init();
     std::cout << CSI_S"?1049h";
+
+    std::cout << "executing directory: " << io::exe_dir << std::endl;
 
     io::ConsoleInputValue input;
 
