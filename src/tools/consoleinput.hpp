@@ -2,13 +2,31 @@
 #define _IO_HPP
 
 #include "keycodes.h"
+#include <cstdio>
+
+#if defined(__linux__)
+    #define _MAX_DEGREE_COUNT 7
+#endif // linux-check
 
 namespace io
 {
     struct ConsoleInputValue
     {
+
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+
         int value = KEYCODE_UNSET;
         bool special = false;
+
+    #elif defined(__linux)
+
+    int values[_MAX_DEGREE_COUNT]{0};
+    ssize_t degree = 1;
+
+    #endif // os-check
+
+        int get_value() const noexcept;
+        bool is_special() const noexcept;
 
         bool operator==(const ConsoleInputValue& other) const noexcept;
         bool operator==(const int& value) const noexcept;
@@ -35,36 +53,33 @@ namespace io
 
     static ConsoleInput console_input;
 
-    constexpr ConsoleInputValue key_arrow_up    {KEYCODE_ARROW_UP,    true};
-    constexpr ConsoleInputValue key_arrow_right {KEYCODE_ARROW_RIGHT, true};
-    constexpr ConsoleInputValue key_arrow_down  {KEYCODE_ARROW_DOWN,  true};
-    constexpr ConsoleInputValue key_arrow_left  {KEYCODE_ARROW_LEFT,  true};
+    constexpr ConsoleInputValue key_arrow_up    {KEYCODE_ARROW_UP};
+    constexpr ConsoleInputValue key_arrow_right {KEYCODE_ARROW_RIGHT};
+    constexpr ConsoleInputValue key_arrow_down  {KEYCODE_ARROW_DOWN};
+    constexpr ConsoleInputValue key_arrow_left  {KEYCODE_ARROW_LEFT};
 
-    // TODO! ooit aanpassen, of unix-systemen zijn pg-up en function keys niet special
-    // lage drang, ga toch geen function keys gebruiken
+    constexpr ConsoleInputValue key_F1  {KEYCODE_F1};
+    constexpr ConsoleInputValue key_F2  {KEYCODE_F2};
+    constexpr ConsoleInputValue key_F3  {KEYCODE_F3};
+    constexpr ConsoleInputValue key_F4  {KEYCODE_F4};
+    constexpr ConsoleInputValue key_F5  {KEYCODE_F5};
+    constexpr ConsoleInputValue key_F6  {KEYCODE_F6};
+    constexpr ConsoleInputValue key_F7  {KEYCODE_F7};
+    constexpr ConsoleInputValue key_F8  {KEYCODE_F8};
+    constexpr ConsoleInputValue key_F9  {KEYCODE_F9};
+    constexpr ConsoleInputValue key_F10 {KEYCODE_F10};
+    constexpr ConsoleInputValue key_F11 {KEYCODE_F11};
+    constexpr ConsoleInputValue key_F12 {KEYCODE_F12};
 
-    constexpr ConsoleInputValue key_F1  {KEYCODE_F1,  true};
-    constexpr ConsoleInputValue key_F2  {KEYCODE_F2,  true};
-    constexpr ConsoleInputValue key_F3  {KEYCODE_F3,  true};
-    constexpr ConsoleInputValue key_F4  {KEYCODE_F4,  true};
-    constexpr ConsoleInputValue key_F5  {KEYCODE_F5,  true};
-    constexpr ConsoleInputValue key_F6  {KEYCODE_F6,  true};
-    constexpr ConsoleInputValue key_F7  {KEYCODE_F7,  true};
-    constexpr ConsoleInputValue key_F8  {KEYCODE_F8,  true};
-    constexpr ConsoleInputValue key_F9  {KEYCODE_F9,  true};
-    constexpr ConsoleInputValue key_F10 {KEYCODE_F10, true};
-    constexpr ConsoleInputValue key_F11 {KEYCODE_F11, true};
-    constexpr ConsoleInputValue key_F12 {KEYCODE_F12, true};
+    constexpr ConsoleInputValue key_insert {KEYCODE_INSERT};
+    constexpr ConsoleInputValue key_home   {KEYCODE_HOME};
+    constexpr ConsoleInputValue key_pgup   {KEYCODE_PGUP};
+    constexpr ConsoleInputValue key_del    {KEYCODE_DEL};
+    constexpr ConsoleInputValue key_end    {KEYCODE_END};
+    constexpr ConsoleInputValue key_pgdn   {KEYCODE_PGDN};
 
-    constexpr ConsoleInputValue key_insert {KEYCODE_INSERT, true};
-    constexpr ConsoleInputValue key_home   {KEYCODE_HOME,   true};
-    constexpr ConsoleInputValue key_pgup   {KEYCODE_PGUP,   true};
-    constexpr ConsoleInputValue key_del    {KEYCODE_DEL,    true};
-    constexpr ConsoleInputValue key_end    {KEYCODE_END,    true};
-    constexpr ConsoleInputValue key_pgdn   {KEYCODE_PGDN,   true};
-
-    constexpr ConsoleInputValue key_esc   {27, false};
-    constexpr ConsoleInputValue key_space {32, false};
+    constexpr ConsoleInputValue key_esc   {27};
+    constexpr ConsoleInputValue key_space {32};
 
 } // namespace io
 

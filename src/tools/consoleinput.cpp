@@ -1,6 +1,6 @@
 #include "consoleinput.hpp"
-#include <cstdio>
-#include <unistd.h>
+#include "keycodes.h"
+#include <sys/types.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
@@ -8,15 +8,18 @@
 
 #elif defined(__linux__)
 
-#include <iostream>
 #include <termios.h>
+#include <limits>
+#include <cstdint>
+#include <unistd.h>
+#include <sys/select.h>
+#include <algorithm>
 
 #endif // os-check
 
 #pragma region Local Definitions
 
-int hide_key() noexcept;
-bool get_key(int& key) noexcept;
+io::ConsoleInputValue get_key() noexcept;
 
 #pragma endregion
 
@@ -29,15 +32,58 @@ namespace io
 
     #endif // linux-check
 
+    int
+    ConsoleInputValue::get_value()
+    const noexcept
+    {
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+
+        return value;
+
+    #elif defined(__linux__)
+
+        return values[degree-1];
+
+    #endif // os-check
+    }
+
+    bool
+    ConsoleInputValue::is_special()
+    const noexcept
+    {
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+
+        return special;
+
+    #elif defined(__linux__)
+
+        return degree > 1;
+
+    #endif // os-check
+    }
+
     bool
     ConsoleInputValue::operator==(
         const ConsoleInputValue& other
     ) const noexcept
     {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    
         if(other.special != special)
             return false;
         
         return other.value == value;
+
+#elif defined(__linux__)
+
+    ssize_t biggest = std::max(degree, other.degree);
+    for(ssize_t i = 0; i < biggest; i++)
+        if(values[i] != other.values[i])
+            return false;
+
+    return true;
+
+#endif // os-check
     }
 
     bool
@@ -45,7 +91,15 @@ namespace io
         const int& other 
     ) const noexcept
     {
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+
         return value == other;
+
+    #elif defined(__linux__)
+
+        return values[degree-1] == other;
+
+    #endif // os-check
     }
 
     bool
@@ -72,7 +126,7 @@ namespace io
        tcgetattr(stdin_fileno, &start_settings);
        struct termios new_settings = start_settings;
 
-       new_settings.c_lflag &= ~ICANON;
+       new_settings.c_lflag &= (~ICANON & ~ECHO);
        tcsetattr(stdin_fileno, TCSANOW, &new_settings);
     #endif // linux-check
     }
@@ -90,9 +144,7 @@ namespace io
     ConsoleInput::get_input()
     noexcept
     {
-        int key = KEYCODE_UNSET;
-        bool special = get_key(key);
-        last_value_ = {key, special};
+        last_value_ = get_key();
         return last_value_;
     }
 
@@ -116,55 +168,41 @@ namespace io
 
 #pragma region Local Implementations
 
-bool
-get_key(int& key)
+io::ConsoleInputValue
+get_key()
 noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
-    int c = 0;
-    c = _getch();
+    int c = _getch();
     if(c && (c != 0xE0 && c != 0))
     {
-        key = c;
-        return false;
+        return io::ConsoleInputValue{c, false};
     }
 
-    key = _getch();
-    return true;
+    return io::ConsoleInputValue{_getch(), true};
 
 #elif defined(__linux__)
 
-    int a=0, b=0;
-    a = hide_key();
-    if(a != 27)
-    {
-        key = a;
-        return false;
-    }
+    static unsigned char keys[_MAX_DEGREE_COUNT] = {
+       0 
+    };
+    std::uint32_t c;
+    fd_set set;
+    struct timeval tv;
+    tv.tv_sec  = std::numeric_limits<__time_t>::max();
+    tv.tv_usec = 0;
 
-    b = hide_key();
-    if(b != 91)
-    {
-        key = a;
-        return false;
-    }
+    FD_ZERO(&set);
+    FD_SET(io::stdin_fileno, &set);
 
-    key = hide_key();
-    return true;
+    int res = select(io::stdin_fileno+1, &set, NULL, NULL, &tv);
+    ssize_t degree = read(io::stdin_fileno, &keys, _MAX_DEGREE_COUNT);
+    return io::ConsoleInputValue{
+        keys[0], keys[1], keys[2], keys[3], keys[4], keys[5], keys[6],
+        degree
+    };
+
 
 #endif // os-check
 }
-
-int
-hide_key()
-noexcept
-{
-    int k=0;
-    system("/bin/stty -echo");
-    k = getchar();
-    system("/bin/stty echo");
-    return k;
-}
-
-#pragma endregion
