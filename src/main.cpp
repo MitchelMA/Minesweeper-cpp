@@ -12,8 +12,9 @@ int main(void)
     std::cout << "executing directory: " << io::exe_dir << std::endl;
 
     io::ConsoleInputValue input;
+    auto q = io::ConsoleInputValue{'q', false};
 
-    while((io::console_input >> input) != io::key_esc)
+    while((io::console_input >> input) != q) 
     {
         if(input.special) 
         {

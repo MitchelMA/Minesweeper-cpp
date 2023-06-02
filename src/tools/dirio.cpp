@@ -11,6 +11,10 @@
     #include <libgen.h>
     #include <unistd.h>
 
+#ifndef _MAX_PATH
+    #define _MAX_PATH 260
+#endif // _MAX_PATH
+
 #endif // os-check
 
 char* GetExcecutableDir(char* dest, std::size_t dest_size);

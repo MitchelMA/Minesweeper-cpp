@@ -4,6 +4,7 @@
 #include <memory>
 #include <exception>
 #include <functional>
+#include <stdexcept>
 
 namespace tools
 {
@@ -19,7 +20,7 @@ namespace tools
         std::unique_ptr<std::exception> failure_;
 
         auto throw_used() const -> void { 
-            throw std::exception("Tried to access an already consumed result");
+            throw std::runtime_error("Tried to access an already consumed result");
         }
 
     public:
@@ -64,7 +65,7 @@ namespace tools
         std::unique_ptr<std::exception> failure_;
 
         auto throw_used() const -> void {
-            throw std::exception("Tried to access an already consumed result");
+            throw std::runtime_error("Tried to access an already consumed result");
         }
     
     public:

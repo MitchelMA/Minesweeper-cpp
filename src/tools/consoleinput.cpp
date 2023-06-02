@@ -1,4 +1,6 @@
 #include "consoleinput.hpp"
+#include <cstdio>
+#include <unistd.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
@@ -13,6 +15,7 @@
 
 #pragma region Local Definitions
 
+int hide_key() noexcept;
 bool get_key(int& key) noexcept;
 
 #pragma endregion
@@ -132,26 +135,36 @@ noexcept
 
 #elif defined(__linux__)
 
-    char c=0, d=0;
-    std::cin >> c;
-
-    if(c != 27)
+    int a=0, b=0;
+    a = hide_key();
+    if(a != 27)
     {
-        key = c;
+        key = a;
         return false;
     }
 
-    std::cin >> d;
-    if(d != 91)
+    b = hide_key();
+    if(b != 91)
     {
-        key = c;
+        key = a;
         return false;
     }
 
-    std::cin >> key;
+    key = hide_key();
     return true;
 
 #endif // os-check
+}
+
+int
+hide_key()
+noexcept
+{
+    int k=0;
+    system("/bin/stty -echo");
+    k = getchar();
+    system("/bin/stty echo");
+    return k;
 }
 
 #pragma endregion

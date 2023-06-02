@@ -40,6 +40,9 @@ namespace io
     constexpr ConsoleInputValue key_arrow_down  {KEYCODE_ARROW_DOWN,  true};
     constexpr ConsoleInputValue key_arrow_left  {KEYCODE_ARROW_LEFT,  true};
 
+    // TODO! ooit aanpassen, of unix-systemen zijn pg-up en function keys niet special
+    // lage drang, ga toch geen function keys gebruiken
+
     constexpr ConsoleInputValue key_F1  {KEYCODE_F1,  true};
     constexpr ConsoleInputValue key_F2  {KEYCODE_F2,  true};
     constexpr ConsoleInputValue key_F3  {KEYCODE_F3,  true};
