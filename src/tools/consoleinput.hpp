@@ -78,8 +78,8 @@ namespace io
     constexpr ConsoleInputValue key_end    {KEYCODE_END};
     constexpr ConsoleInputValue key_pgdn   {KEYCODE_PGDN};
 
-    constexpr ConsoleInputValue key_esc   {27, false};
-    constexpr ConsoleInputValue key_space {32, false};
+    constexpr ConsoleInputValue key_esc   {27};
+    constexpr ConsoleInputValue key_space {32};
 
 } // namespace io
 
