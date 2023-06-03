@@ -1,5 +1,6 @@
 #include "consoleinput.hpp"
 #include "keycodes.h"
+#include <atomic>
 #include <cstdint>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
@@ -31,7 +32,7 @@ namespace io
 
     #endif // linux-check
 
-    int
+    std::uint64_t 
     ConsoleInputValue::get_value()
     const noexcept
     {

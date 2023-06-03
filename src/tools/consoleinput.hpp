@@ -25,7 +25,7 @@ namespace io
 
     #endif // os-check
 
-        int get_value() const noexcept;
+        std::uint64_t get_value() const noexcept;
         bool is_special() const noexcept;
 
         bool operator==(const ConsoleInputValue& other) const noexcept;
@@ -78,8 +78,8 @@ namespace io
     constexpr ConsoleInputValue key_end    {KEYCODE_END};
     constexpr ConsoleInputValue key_pgdn   {KEYCODE_PGDN};
 
-    constexpr ConsoleInputValue key_esc   {27, 1};
-    constexpr ConsoleInputValue key_space {32, 1};
+    constexpr ConsoleInputValue key_esc   {27, false};
+    constexpr ConsoleInputValue key_space {32, false};
 
 } // namespace io
 
