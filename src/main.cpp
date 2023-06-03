@@ -16,6 +16,16 @@ int main(void)
 
     while((io::console_input >> input) != io::key_esc)
     {
+
+    #if defined(__linux__)
+
+        std::uint8_t* bytes = (std::uint8_t*)&input.value;
+        for(std::size_t i = 0; i < input.degree; i++)
+            std::cout << "[" << (int)bytes[i] << "]";
+        std::cout << std::endl;
+
+    #endif // linux-check
+
         if(input == io::key_arrow_up)
             std::cout << "arrow-up" << std::endl;
 
@@ -31,14 +41,16 @@ int main(void)
         if(input.is_special())
         {
             std::cout << CSI_S"31m";
-            std::cout << "special-value: " << input.get_value();
-            std::cout << CSI_S"m" << std::endl;
+            std::cout << "special-value: " << input.value;
+            std::cout << CSI_S"m\n" << std::endl;
             continue;
         }
 
         std::cout << "non-special-value: "
+    #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
         << input.get_value()
-        << " (" << (char)input.get_value() << ")"
+    #endif
+        << " (" << (char)input.get_value() << ")\n"
         << std::endl;
     }
 

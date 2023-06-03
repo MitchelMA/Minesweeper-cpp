@@ -3,6 +3,7 @@
 
 #include "keycodes.h"
 #include <cstdio>
+#include <cstdint>
 
 #if defined(__linux__)
     #define _MAX_DEGREE_COUNT 7
@@ -12,16 +13,15 @@ namespace io
 {
     struct ConsoleInputValue
     {
+        std::uint64_t value = KEYCODE_UNSET;
 
     #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
-        int value = KEYCODE_UNSET;
         bool special = false;
 
-    #elif defined(__linux)
+    #elif defined(__linux__)
 
-    int values[_MAX_DEGREE_COUNT]{0};
-    ssize_t degree = 1;
+        std::size_t degree = 1;
 
     #endif // os-check
 
@@ -29,10 +29,10 @@ namespace io
         bool is_special() const noexcept;
 
         bool operator==(const ConsoleInputValue& other) const noexcept;
-        bool operator==(const int& value) const noexcept;
+        bool operator==(const std::uint64_t& value) const noexcept;
 
         bool operator!=(const ConsoleInputValue& other) const noexcept;
-        bool operator!=(const int& value) const noexcept;
+        bool operator!=(const std::uint64_t& value) const noexcept;
     };
 
     class ConsoleInput
@@ -78,8 +78,8 @@ namespace io
     constexpr ConsoleInputValue key_end    {KEYCODE_END};
     constexpr ConsoleInputValue key_pgdn   {KEYCODE_PGDN};
 
-    constexpr ConsoleInputValue key_esc   {27};
-    constexpr ConsoleInputValue key_space {32};
+    constexpr ConsoleInputValue key_esc   {27, 1};
+    constexpr ConsoleInputValue key_space {32, 1};
 
 } // namespace io
 
