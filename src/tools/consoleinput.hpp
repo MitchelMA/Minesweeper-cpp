@@ -6,7 +6,7 @@
 #include <cstdint>
 
 #if defined(__linux__)
-    #define _MAX_DEGREE_COUNT 7
+    #define _MAX_DEGREE_COUNT 8
 #endif // linux-check
 
 namespace io

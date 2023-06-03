@@ -87,6 +87,9 @@
 
 #elif defined(__linux__)
 
+#define __VA_COUNT__(...) (sizeof((int[]){__VA_ARGS__})/sizeof(int))
+#define __VA_FIRST__(A, ...) (A)
+
 #define _SET_KEYCODE_1(a) (std::uint64_t)a
 #define _SET_KEYCODE_2(a, b) _SET_KEYCODE_1(a) | ((std::uint64_t)b << CHAR_BIT)
 #define _SET_KEYCODE_3(a, b, c) _SET_KEYCODE_2(a, b) | ((std::uint64_t)c << CHAR_BIT*2)
