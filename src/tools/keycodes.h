@@ -87,6 +87,7 @@
 
 #elif defined(__linux__)
 
+// https://stackoverflow.com/questions/53597804/extracting-first-parameter-of-va-args
 #define __VA_COUNT__(...) (sizeof((int[]){__VA_ARGS__})/sizeof(int))
 #define __VA_FIRST__(A, ...) (A)
 
