@@ -1,8 +1,18 @@
 #include <iostream>
-#include <ostream>
+#include <memory>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
-#include "tools/dirio.hpp"
+#include "tools/dirio.hpp"dd
+#include "field/playfield.hpp"
+
+static std::unique_ptr<field::Playfield> playfield;
+constexpr std::size_t stand_field_size = 30;
+constexpr int stand_bomb_percentage = 10;
+
+#define SAVE_FILE_NAME "save.bin"
+static std::string save_file_location = io::join(io::exe_dir, SAVE_FILE_NAME);
+
+void init_field();
 
 int main(void)
 {
@@ -13,6 +23,8 @@ int main(void)
     std::cout << "executing directory: " << io::exe_dir << std::endl;
 
     io::ConsoleInputValue input;
+
+    init_field();
 
     while((io::console_input >> input) != io::key_esc)
     {
@@ -59,4 +71,17 @@ int main(void)
     io::console_input.restore();
     ansi::disable_ansi();
     return EXIT_SUCCESS;
+}
+
+void init_field()
+{
+    auto result = field::Playfield::from_file(save_file_location);
+    result.match(
+        [](std::unique_ptr<field::Playfield> value) {
+            
+        },
+        [](auto error) {
+            std::cerr << error->what() << std::endl;
+        }
+    );
 }
