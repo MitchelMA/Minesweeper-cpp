@@ -14,7 +14,7 @@ namespace field
     {
         bool gameover;
         std::uint32_t bombpercentage;
-        std::uint32_t seed;
+        std::size_t seed;
         std::size_t size;
         std::size_t caret_x;
         std::size_t caret_y;
@@ -22,8 +22,8 @@ namespace field
         std::unique_ptr<std::unique_ptr<Cell[]>[]> cells;
 
         static tools::Result<std::unique_ptr<Playfield>> from_file(std::string file_name) noexcept;
-        void set_cells(byte* bytes) noexcept;
-        void set_cells(std::size_t size) noexcept;
+        int set_cells(byte* bytes, std::size_t byte_count) noexcept;
+        void set_cells() noexcept;
     };
 }
 

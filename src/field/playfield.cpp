@@ -1,6 +1,8 @@
+#include <cmath>
 #include <cstddef>
 #include <format>
 #include <memory>
+#include <time.h>
 #include "playfield.hpp"
 #include "cell.hpp"
 
@@ -8,6 +10,11 @@ static FILE* save_file;
 
 #define OPEN_SAVE_R fopen_s(&save_file, file_name.c_str(), "rb")
 #define CLOSE_SAVE fclose(save_file)
+
+void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
+
+#define STAND_FIELD_SIZE 30
+#define STAND_BOMB_PERCENTAGE 10
 
 namespace field
 {
@@ -38,7 +45,7 @@ namespace field
             return field;
         }
 
-        if(fscanf_s(save_file, "%u", &field->seed) == EOF)
+        if(fscanf_s(save_file, "%zu", &field->seed) == EOF)
         {
             CLOSE_SAVE;
             return new std::runtime_error("No seed was found where seed was expected");
@@ -53,32 +60,120 @@ namespace field
             field->size * field->size,
             save_file
         );
+        CLOSE_SAVE;
 
         if(read_count != field->size * field->size)
-        {
-            CLOSE_SAVE;
             return new std::runtime_error(
                 std::format(
                     "Could only read {} bytes of data where there should have been {} bytes of data", 
                     read_count, field->size * field->size
                 )
             );
-        }
 
-        field->cells = std::make_unique<std::unique_ptr<Cell[]>[]>(field->size * field->size);
-        for(std::size_t i = 0; i < field->size; i++)
-        {
-            field->cells[i] = std::make_unique<Cell[]>(field->size);
+        field->set_cells(bytes.get(), field->size*field->size);
 
-            for(std::size_t j = 0; j < field->size; j++)
-            {
-                std::size_t index = i * field->size + j;
-                field->cells[i][j] = Cell(bytes[index]);
-            }
-        }
-
-        CLOSE_SAVE;
         return field;
     }
 
+    int
+    Playfield::set_cells(byte* bytes, std::size_t byte_count)
+    noexcept
+    {
+        if(byte_count * byte_count != size)
+            return 1;
+
+        if(cells.get() != nullptr)
+            return 1;
+            
+        cells = std::make_unique<std::unique_ptr<Cell[]>[]>(size);
+        for(std::size_t i = 0; i < size; i++)
+        {
+            cells[i] = std::make_unique<Cell[]>(size);
+
+            for(std::size_t j = 0; j < size; j++)
+            {
+                std::size_t index = i * size + j;
+                cells[i][j] = bytes[index];
+            }
+        }
+
+       return 0;
+    }
+
+    void
+    Playfield::set_cells()
+    noexcept
+    {
+        seed == 0 ? seed = time(0) : false;
+        srand((unsigned int)seed);
+        std::size_t bomb_count = (std::size_t)((float)bombpercentage / (float)100) * (size * size);
+
+        if(cells.get() == nullptr)
+        {
+            cells = std::make_unique<std::unique_ptr<Cell[]>[]>(size);
+            for(std::size_t i = 0; i < size; i++)
+                cells[i] = std::make_unique<Cell[]>(size);
+        }
+
+        for(std::size_t i = 0; i < bomb_count;)
+        {
+            std::size_t rand_x = rand() % size;
+            std::size_t rand_y = rand() % size;
+
+            auto cell = cells[rand_y][rand_x];
+
+            if(cell.is_flag(field::cell_bomb))
+                continue;
+
+            cell_set_bomb(*this, rand_x, rand_y);
+            i++;
+        }
+    }
+
 } // namespace field
+
+void
+cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y)
+noexcept
+{
+    if(x < 0 || y < 0 || x >= field.size || y >= field.size)
+        return;
+
+    auto cell = field.cells[y][x];
+
+    cell.value_ |= field::cell_bomb;
+    if (x > 0)
+    {
+        field.cells[y][x - 1].neighbours_++;
+    }
+    if (x < field.size - 1)
+    {
+        field.cells[y][x + 1].neighbours_++;
+    }
+
+    if (y > 0)
+    {
+        field.cells[y - 1][x].neighbours_++;
+    }
+    if (y < field.size - 1)
+    {
+        field.cells[y + 1][x].neighbours_++;
+    }
+
+    if (x > 0 && y > 0)
+    {
+        field.cells[y - 1][x - 1].neighbours_++;
+    }
+    if (x < field.size - 1 && y > 0)
+    {
+        field.cells[y - 1][x + 1].neighbours_++;
+    }
+    if (x > 0 && y < field.size - 1)
+    {
+        field.cells[y + 1][x - 1].neighbours_++;
+    }
+    if (x < field.size - 1 && y < field.size - 1)
+    {
+        field.cells[y + 1][x + 1].neighbours_++;
+    }
+}

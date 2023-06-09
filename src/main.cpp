@@ -2,19 +2,18 @@
 #include <memory>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
-#include "tools/dirio.hpp"dd
+#include "tools/dirio.hpp"
 #include "field/playfield.hpp"
 
-static std::unique_ptr<field::Playfield> playfield;
-constexpr std::size_t stand_field_size = 30;
-constexpr int stand_bomb_percentage = 10;
+static std::unique_ptr<field::Playfield> playfield(new field::Playfield);
+
 
 #define SAVE_FILE_NAME "save.bin"
 static std::string save_file_location = io::join(io::exe_dir, SAVE_FILE_NAME);
 
-void init_field();
+void init_field(int argc, char* argv[]);
 
-int main(void)
+int main(int argc, char* argv[])
 {
     ansi::enable_ansi();
     io::console_input.init();
@@ -24,7 +23,7 @@ int main(void)
 
     io::ConsoleInputValue input;
 
-    init_field();
+    init_field(argc, argv);
 
     while((io::console_input >> input) != io::key_esc)
     {
@@ -73,15 +72,28 @@ int main(void)
     return EXIT_SUCCESS;
 }
 
-void init_field()
+void init_field(int argc, char* argv[])
 {
+    bool successful = false;
     auto result = field::Playfield::from_file(save_file_location);
     result.match(
-        [](std::unique_ptr<field::Playfield> value) {
-            
+        [&successful](std::unique_ptr<field::Playfield> value) {
+            value.swap(playfield);
+            if(playfield->cells.get() != nullptr)
+                return;
+
+            playfield->seed = 0;
+            playfield->set_cells();
+            successful = true;
         },
         [](auto error) {
             std::cerr << error->what() << std::endl;
         }
     );
+
+    if(successful)
+        return;
+
+        
+    
 }
