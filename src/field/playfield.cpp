@@ -1,10 +1,9 @@
 #include <cmath>
-#include <cstddef>
 #include <format>
-#include <memory>
 #include <time.h>
+#include <iostream>
+#include <sstream>
 #include "playfield.hpp"
-#include "cell.hpp"
 
 static FILE* save_file;
 
@@ -12,9 +11,6 @@ static FILE* save_file;
 #define CLOSE_SAVE fclose(save_file)
 
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
-
-#define STAND_FIELD_SIZE 30
-#define STAND_BOMB_PERCENTAGE 10
 
 namespace field
 {
@@ -79,7 +75,7 @@ namespace field
     Playfield::set_cells(byte* bytes, std::size_t byte_count)
     noexcept
     {
-        if(byte_count * byte_count != size)
+        if(size * size != byte_count)
             return 1;
 
         if(cells.get() != nullptr)
@@ -106,7 +102,7 @@ namespace field
     {
         seed == 0 ? seed = time(0) : false;
         srand((unsigned int)seed);
-        std::size_t bomb_count = (std::size_t)((float)bombpercentage / (float)100) * (size * size);
+        std::size_t bomb_count = (std::size_t)(((float)bombpercentage / 100) * (size * size));
 
         if(cells.get() == nullptr)
         {
@@ -130,6 +126,23 @@ namespace field
         }
     }
 
+    void
+    Playfield::display()
+    const noexcept
+    {
+        std::ostringstream buffer;
+        for(std::size_t y = 0; y < size; y++)
+        {
+            for(std::size_t x = 0; x < size; x++) 
+            {
+                std::size_t index = y * size + x;
+                buffer << cells[y][x].value_;
+            }
+            buffer << '\n';
+        }
+        std::cout << buffer.str() << std::endl;
+    }
+
 } // namespace field
 
 void
@@ -139,7 +152,7 @@ noexcept
     if(x < 0 || y < 0 || x >= field.size || y >= field.size)
         return;
 
-    auto cell = field.cells[y][x];
+    auto& cell = field.cells[y][x];
 
     cell.value_ |= field::cell_bomb;
     if (x > 0)

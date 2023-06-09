@@ -8,6 +8,9 @@
 #include "../tools/Result/result.hpp"
 #include "cell.hpp"
 
+#define STAND_FIELD_SIZE 30
+#define STAND_BOMB_PERCENTAGE 10
+
 namespace field
 {
     struct Playfield
@@ -24,6 +27,7 @@ namespace field
         static tools::Result<std::unique_ptr<Playfield>> from_file(std::string file_name) noexcept;
         int set_cells(byte* bytes, std::size_t byte_count) noexcept;
         void set_cells() noexcept;
+        void display() const noexcept;
     };
 }
 
