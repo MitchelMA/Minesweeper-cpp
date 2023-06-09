@@ -14,9 +14,9 @@ static io::ConsoleInputValue input;
 static std::string save_file_location = io::join(io::exe_dir, SAVE_FILE_NAME SAVE_FILE_EXTENSION);
 
 void init_field(int argc);
-void handle_argv(int argc, char* argv[]);
+void handle_argv(int argc, const char* argv[]);
 
-int main(int argc, char* argv[])
+int main(int argc, const char* argv[])
 {
     playfield->size = STAND_FIELD_SIZE;
     playfield->bombpercentage = STAND_BOMB_PERCENTAGE;
@@ -64,7 +64,7 @@ void init_field(int argc)
     );
 }
 
-void handle_argv(int argc, char* argv[])
+void handle_argv(int argc, const char* argv[])
 {
     std::stringstream ss;
     if(argc == 1)

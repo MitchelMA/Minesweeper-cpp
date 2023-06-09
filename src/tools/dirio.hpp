@@ -22,6 +22,9 @@ namespace io
     template <typename ... R>
     std::string join(std::string first, R... remainder);
 
+    std::string join(std::string* params, std::size_t param_count);
+    std::string join(const char* params[], std::size_t param_count);
+
 } // namespace io
 
 #include "dirio.ipp"
