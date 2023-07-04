@@ -49,7 +49,7 @@ void init_field(int argc)
     result.match(
         [](std::unique_ptr<field::Playfield> value) {
             value.swap(playfield);
-            if(playfield->cells.get() != nullptr)
+            if(playfield->cells != nullptr)
                 return;
 
             playfield->seed = 0;

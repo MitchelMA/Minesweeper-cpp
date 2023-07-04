@@ -36,7 +36,7 @@ namespace tools
             is_failure_(true) {};
         Result(const Result<TValue>& other);
         Result(Result<TValue>& other);
-        ~Result() noexcept {};
+        ~Result() noexcept = default;
 
         constexpr bool match(
             std::function<void(TValue&&)> success,
@@ -76,7 +76,7 @@ namespace tools
             is_failure_(true) {};
         Result(const Result<std::unique_ptr<TValue>>& other);
         Result(Result<std::unique_ptr<TValue>>& other);
-        ~Result() noexcept {};
+        ~Result() noexcept = default;
 
         constexpr bool match(
             std::function<void(std::unique_ptr<TValue>)> success,
