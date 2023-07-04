@@ -5,7 +5,7 @@
 #include "tools/dirio.hpp"
 #include "field/playfield.hpp"
 
-static std::unique_ptr<field::Playfield> playfield(new field::Playfield {0});
+static std::unique_ptr<field::Playfield> playfield(std::make_unique<field::Playfield>());
 static io::ConsoleInputValue input;
 
 
