@@ -7,8 +7,30 @@
 
 static FILE* save_file;
 
-#define OPEN_SAVE_R fopen_s(&save_file, file_name.c_str(), "rb")
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    #define OPEN_SAVE_R fopen_s(&save_file, file_name.c_str(), "rb")
+#elif defined(__linux__)
+    #define OPEN_SAVE_R save_file = fopen(file_name.c_str(), "rb")
+#endif // os-check
 #define CLOSE_SAVE fclose(save_file)
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    #define SCAN_BASE_FLAGS fscanf_s(save_file, "%zu %u %d", &field->size, &field->bombpercentage, &has_save)
+#elif defined(__linux__)
+    #define SCAN_BASE_FLAGS fscanf(save_file, "%zu %u %d", &field->size, &field->bombpercentage, &has_save)
+#endif // os-check
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    #define SCAN_SEED fscanf_s(save_file, "%zu", &field->seed)
+#elif defined(__linux__)
+    #define SCAN_SEED fscanf(save_file, "%zu", &field->seed)
+#endif // os-check
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    #define SCAN_CELLS fread_s(bytes.get(), field->size * field->size, 1, field->size * field->size, save_file)
+#elif defined(__linux__)
+    #define SCAN_CELLS fread(bytes.get(), 1, field->size * field->size, save_file)
+#endif // os-check
 
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
 
@@ -29,7 +51,7 @@ namespace field
         auto field = std::make_unique<Playfield>();
 
         int has_save = 0;
-        if(fscanf_s(save_file, "%zu %u %d", &field->size, &field->bombpercentage, &has_save) == EOF)
+        if(SCAN_BASE_FLAGS == EOF)
         {
             CLOSE_SAVE;
             return new std::runtime_error("Found data in incorrect format");
@@ -41,21 +63,14 @@ namespace field
             return field;
         }
 
-        if(fscanf_s(save_file, "%zu", &field->seed) == EOF)
+        if(SCAN_SEED == EOF)
         {
             CLOSE_SAVE;
             return new std::runtime_error("No seed was found where seed was expected");
         }
 
-        // auto bytes = new byte[field->size * field->size];
         auto bytes = std::make_unique<byte[]>(field->size * field->size);
-        auto read_count = fread_s(
-            bytes.get(),
-            field->size * field->size,
-            1,
-            field->size * field->size,
-            save_file
-        );
+        auto read_count = SCAN_CELLS;
         CLOSE_SAVE;
 
         if(read_count != field->size * field->size)
