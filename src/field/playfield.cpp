@@ -1,6 +1,6 @@
 #include <cmath>
 #include <format>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 #include <sstream>
 #include "playfield.hpp"
@@ -31,6 +31,17 @@ static FILE* save_file;
 #elif defined(__linux__)
     #define SCAN_CELLS fread(bytes.get(), 1, field->size * field->size, save_file)
 #endif // os-check
+
+#define FLAG_ESCAPE_CODE "\x1b[4m\x1b[97m\x1b[101m"
+
+#define BOMB_ESCAPE_CODE "\x1b[97m\x1b[41m"
+
+#define NON_BOMB_ESCAPE(OSTREAM, NEIGHBOUR_COUNT, ESCAPE_ARRAY)                  \
+    do {                                                                         \
+        OSTREAM << ESCAPE_ARRAY[NEIGHBOUR_COUNT];                                \
+        OSTREAM << (NEIGHBOUR_COUNT == 0 ? ' ' : (char) (NEIGHBOUR_COUNT + 48)); \
+        OSTREAM << "\x1b[0m";                                                    \
+    } while(0)
 
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
 
@@ -104,7 +115,7 @@ namespace field
             for(std::size_t j = 0; j < size; j++)
             {
                 std::size_t index = i * size + j;
-                cells[i][j] = bytes[index];
+                cells[i][j] = field::Cell(bytes[index]);
             }
         }
 
@@ -115,7 +126,7 @@ namespace field
     Playfield::set_cells()
     noexcept
     {
-        seed == 0 ? seed = time(0) : false;
+        seed == 0 && (seed = time(nullptr));
         srand((unsigned int)seed);
         std::size_t bomb_count = (std::size_t)(((float)bombpercentage / 100) * (size * size));
 
@@ -141,21 +152,58 @@ namespace field
         }
     }
 
-    void
-    Playfield::display()
-    const noexcept
+    std::string
+    Playfield::as_text() const noexcept
     {
         std::ostringstream buffer;
+        static const std::string ANSI_COLOURS[9] = {
+                "\x1b[0m",
+                "\x1b[34m",
+                "\x1b[32m",
+                "\x1b[31m",
+                "\x1b[35m",
+                "\x1b[90m",
+                "\x1b[36m",
+                "\x1b[2m",
+                "\x1b[33m"
+        };
+
         for(std::size_t y = 0; y < size; y++)
         {
-            for(std::size_t x = 0; x < size; x++) 
+            for(std::size_t x = 0; x < size; x++)
             {
-                std::size_t index = y * size + x;
-                buffer << cells[y][x].value_;
+                bool chosen = x == caret_x && y == caret_y;
+                buffer << (chosen ? '[' : ' ');
+                Cell& cell = cells[y][x];
+
+                if(cell.is_flag(field::cell_flagged))
+                {
+                    buffer << FLAG_ESCAPE_CODE << "f\x1b[0m";
+                }
+                else if(cell.is_flag(field::cell_opened))
+                {
+                    if(cell.is_flag(field::cell_bomb))
+                    {
+                        buffer << BOMB_ESCAPE_CODE << "*\x1b[0m";
+                    }
+                    else
+                    {
+                        std::uint32_t neighbour_count = cell.neighbours_;
+                        NON_BOMB_ESCAPE(buffer, neighbour_count, ANSI_COLOURS);
+                    }
+                }
+                else
+                {
+                    buffer << '.';
+                }
+
+                buffer << (chosen ? ']' : ' ');
             }
-            buffer << '\n';
+            if(y < size - 1)
+                buffer << "\n";
         }
-        std::cout << buffer.str() << std::endl;
+
+        return buffer.str();
     }
 
 } // namespace field

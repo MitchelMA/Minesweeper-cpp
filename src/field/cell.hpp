@@ -8,7 +8,7 @@ namespace field
 
     constexpr std::uint32_t cell_opened  = 0x0001;
     constexpr std::uint32_t cell_bomb    = 0x0002;
-    constexpr std::uint32_t cell_flagged = 0x0003;
+    constexpr std::uint32_t cell_flagged = 0x0004;
 
     using byte = unsigned char;
 
@@ -20,9 +20,11 @@ namespace field
         Cell() = default;
         Cell(std::uint32_t value, std::uint32_t neighbours) noexcept :
             value_(value), neighbours_(neighbours) {};
-        Cell(byte value) noexcept;
+        explicit Cell(byte value) noexcept;
 
+        [[nodiscard("Returned byte is encouraged to be used.")]]
         byte to_byte() const noexcept;
+        [[nodiscard("Returned boolean is encouraged to be used.")]]
         bool is_flag(std::uint32_t flag) const noexcept;
     };
 

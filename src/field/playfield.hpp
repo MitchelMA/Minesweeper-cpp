@@ -15,19 +15,23 @@ namespace field
 {
     struct Playfield
     {
+    private:
+        std::size_t s_cursor_x_;
+        std::size_t s_cursor_y_;
+    public:
         bool gameover;
         std::uint32_t bombpercentage;
         std::size_t seed;
         std::size_t size;
         std::size_t caret_x;
         std::size_t caret_y;
-        // Cell** cells;
         std::unique_ptr<std::unique_ptr<Cell[]>[]> cells;
 
         static tools::Result<std::unique_ptr<Playfield>> from_file(std::string file_name) noexcept;
         int set_cells(byte* bytes, std::size_t byte_count) noexcept;
         void set_cells() noexcept;
-        void display() const noexcept;
+        [[nodiscard("Returned string is encouraged to be used.")]]
+        std::string as_text() const noexcept;
     };
 }
 

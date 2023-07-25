@@ -27,12 +27,17 @@ int main(int argc, const char* argv[])
     ansi::enable_ansi();
     io::console_input.init();
 
+    // Enter alternative buffer
     std::cout << CSI_S"?1049h";
+    // Force cursor to position [1,1]
+    std::cout << CSI_S"1;1H";
 
+    std::cout << "Seed: " << playfield->seed << "\n\n";
 
-    playfield->display();
+    std::cout << playfield->as_text();
     io::console_input >> input;
 
+    // Exit alternative buffer
     std::cout << CSI_S"?1049l";
 
     io::console_input.restore();
