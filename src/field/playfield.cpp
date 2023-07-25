@@ -13,6 +13,13 @@ static FILE* save_file;
 #elif defined(__linux__)
     #define OPEN_SAVE_R save_file = fopen(file_name.c_str(), "rb")
 #endif // os-check
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
+    #define OPEN_SAVE_W fopen_s(&save_file, file_name.c_str(), "wb")
+#elif defined(__linux__)
+    #define OPEN_SAVE_W save_file = fopen(file_name.c_str(), "wb")
+#endif // os-check
+
 #define CLOSE_SAVE fclose(save_file)
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
@@ -108,7 +115,65 @@ namespace field
             int save_cells
     ) const noexcept
     {
+        OPEN_SAVE_W;
+        if(save_file == nullptr)
+            return new std::runtime_error(
+                    std::format("Couldn't open file \"{}\"", file_name));
 
+        char buffer[256];
+        sprintf(buffer, "%zu %u ", this->size, this->bombpercentage);
+        if(fputs(buffer, save_file) == EOF)
+        {
+            CLOSE_SAVE;
+            return new std::runtime_error("Unable to write size and bomb-percentage to save-file!");
+        }
+
+        if(save_cells && (this->cells != nullptr || this->seed == 0))
+        {
+            fputc(0 + '0', save_file);
+            CLOSE_SAVE;
+            return 0;
+        }
+
+        if(fputc(save_cells + '0', save_file) == EOF)
+        {
+            CLOSE_SAVE;
+            return new std::runtime_error("Unable to write save-status to save-file!");
+        }
+
+        if(!save_cells)
+        {
+            CLOSE_SAVE;
+            return 2;
+        }
+
+        sprintf(buffer, " %zu", this->seed);
+        if(fputs(buffer, save_file) == EOF)
+        {
+            CLOSE_SAVE;
+            return new std::runtime_error("Unable to write seed to save-file!");
+        }
+
+        std::unique_ptr<field::byte[]> bytes = std::make_unique<field::byte[]>(this->size * this->size);
+
+        for (std::size_t y = 0; y < this->size; y++)
+        {
+            for (std::size_t x = 0; x < this->size; x++)
+            {
+                std::size_t index = y * this->size + x;
+                bytes[index] = this->cells[y][x].to_byte();
+            }
+        }
+
+        std::size_t written = fwrite(bytes.get(), sizeof(field::byte), this->size * this->size, save_file);
+        if(written != this->size * this->size)
+        {
+            CLOSE_SAVE;
+            return new std::runtime_error("Failed to write cells to save-file!");
+        }
+
+        CLOSE_SAVE;
+        return 1;
     }
 
     int
