@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <csignal>
 #include "tools/consoleinput.hpp"
 #include "tools/ansi.hpp"
 #include "tools/dirio.hpp"
@@ -17,9 +18,15 @@ void handle_exit_code(int code) noexcept;
 void handle_user_exit() noexcept;
 void handle_gameover() noexcept;
 void handle_win() noexcept;
+void handle_error() noexcept;
+void signal_handler(int code) noexcept;
+void handle_write(const field::Playfield& field, bool save_cells) noexcept;
 
 int main(int argc, const char* argv[])
 {
+    signal(SIGSEGV, signal_handler);
+    signal(SIGINT, signal_handler);
+
     playfield->size = STAND_FIELD_SIZE;
     playfield->bombpercentage = STAND_BOMB_PERCENTAGE;
 
@@ -131,6 +138,9 @@ noexcept
         case 3:
             handle_win();
             break;
+        case 4:
+            handle_error();
+            break;
         default:
             std::cout << "Unexpected exit-code!" << " (" << code << ")" << std::endl;
     };
@@ -140,22 +150,74 @@ void
 handle_user_exit()
 noexcept
 {
-    std::cout << "Bedankt voor het spelen van Minesweeper!" << std::endl;
-    // Todo! something to do with saving the field to the save-file.bin
+    std::cout << "\nBedankt voor het spelen van Minesweeper!" << std::endl;
+    handle_write(*playfield, true);
 }
 
 void
 handle_gameover()
 noexcept
 {
+    std::cout << CSI_S"u";
+    std::cout << playfield->peek() << "\n\n";
     std::cout << "Wat jammer, je raakte een bom!" << std::endl;
-    // Todo! something with clearing the save-file.bin except the field-size
+    handle_write(*playfield, false);
 }
 
 void
 handle_win()
 noexcept
 {
+    std::cout << CSI_S"u";
+    std::cout << playfield->peek() << "\n\n";
     std::cout << "Je hebt gewonnen!!" << std::endl;
-    // todo! something with clearing the save-file.bin except the field-size
+    handle_write(*playfield, false);
+}
+
+void
+handle_error()
+noexcept
+{
+    std::cout << "Er is iets mis gegaan!" << std::endl;
+    handle_write(*playfield, true);
+}
+
+void handle_write(
+        const field::Playfield& field,
+        bool save_cells
+) noexcept
+{
+    auto result = field.write_to_file(save_file_location, save_cells);
+    result.match(
+            [](int && status)
+            {
+                std::cout << "Succesvol het spel opgeslagen met code: " << status << std::endl;
+            },
+            [](auto error)
+            {
+                std::cerr << "Something went wrong while trying to write to save-file: " << error->what() << std::endl;
+            }
+    );
+}
+
+
+void
+signal_handler(int code)
+noexcept
+{
+    switch(code)
+    {
+        case SIGINT:
+        {
+            playfield->exit_code = 1;
+        }
+        break;
+        case SIGSEGV:
+        {
+            playfield->exit_code = 4;
+        }
+        break;
+        default:
+            break;
+    }
 }

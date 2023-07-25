@@ -57,6 +57,18 @@ bool handle_open(field::Playfield& field, const io::ConsoleInputValue& input) no
 bool handle_flag(field::Playfield& field, const io::ConsoleInputValue& input) noexcept;
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
 
+static const std::string ANSI_COLOURS[9] = {
+        "\x1b[0m",
+        "\x1b[34m",
+        "\x1b[32m",
+        "\x1b[31m",
+        "\x1b[35m",
+        "\x1b[90m",
+        "\x1b[36m",
+        "\x1b[2m",
+        "\x1b[33m"
+};
+
 namespace field
 {
 
@@ -112,7 +124,7 @@ namespace field
     tools::Result<int>
     Playfield::write_to_file(
             std::string file_name,
-            int save_cells
+            bool save_cells
     ) const noexcept
     {
         OPEN_SAVE_W;
@@ -128,7 +140,7 @@ namespace field
             return new std::runtime_error("Unable to write size and bomb-percentage to save-file!");
         }
 
-        if(save_cells && (this->cells != nullptr || this->seed == 0))
+        if(save_cells && (this->cells == nullptr || this->seed == 0))
         {
             fputc(0 + '0', save_file);
             CLOSE_SAVE;
@@ -183,7 +195,7 @@ namespace field
         if(size * size != byte_count)
             return 1;
 
-        if(cells.get() != nullptr)
+        if(cells != nullptr)
             return 1;
 
         cells = std::make_unique<std::unique_ptr<Cell[]>[]>(size);
@@ -236,18 +248,6 @@ namespace field
     const noexcept
     {
         std::ostringstream buffer;
-        static const std::string ANSI_COLOURS[9] = {
-                "\x1b[0m",
-                "\x1b[34m",
-                "\x1b[32m",
-                "\x1b[31m",
-                "\x1b[35m",
-                "\x1b[90m",
-                "\x1b[36m",
-                "\x1b[2m",
-                "\x1b[33m"
-        };
-
         for(std::size_t y = 0; y < size; y++)
         {
             for(std::size_t x = 0; x < size; x++)
@@ -258,13 +258,13 @@ namespace field
 
                 if(cell.is_flag(field::cell_flagged))
                 {
-                    buffer << FLAG_ESCAPE_CODE << "f\x1b[0m";
+                    buffer << FLAG_ESCAPE_CODE"f\x1b[0m";
                 }
                 else if(cell.is_flag(field::cell_opened))
                 {
                     if(cell.is_flag(field::cell_bomb))
                     {
-                        buffer << BOMB_ESCAPE_CODE << "*\x1b[0m";
+                        buffer << BOMB_ESCAPE_CODE"*\x1b[0m";
                     }
                     else
                     {
@@ -281,6 +281,43 @@ namespace field
             }
             if(y < size - 1)
                 buffer << "\n";
+        }
+
+        return buffer.str();
+    }
+
+    std::string
+    Playfield::peek()
+    const noexcept
+    {
+        std::ostringstream buffer;
+        for (std::size_t y = 0; y < this->size; y++)
+        {
+           for (std::size_t x = 0; x < this->size; x++)
+           {
+               buffer << ' ';
+               Cell& cell = this->cells[y][x];
+               if(cell.is_flag(field::cell_flagged))
+               {
+                   buffer << FLAG_ESCAPE_CODE"f\x1b[0m";
+                   buffer << ' ';
+                   continue;
+               }
+
+               if(cell.is_flag(field::cell_bomb))
+               {
+                   buffer << BOMB_ESCAPE_CODE"*\x1b[0m";
+                   buffer << ' ';
+                   continue;
+               }
+
+               std::uint32_t neighbour_count = cell.neighbours_;
+               NON_BOMB_ESCAPE(buffer, neighbour_count, ANSI_COLOURS);
+               buffer << ' ';
+           }
+
+           if(y < this->size- 1)
+               buffer << '\n';
         }
 
         return buffer.str();
@@ -337,12 +374,12 @@ namespace field
     noexcept
     {
         static io::ConsoleInputValue input;
-        int exit_code = 0;
+        this->exit_code = 0;
 
         // Save current cursor position
         std::cout << CSI_S"s";
 
-        while(exit_code == 0)
+        while(this->exit_code == 0)
         {
             // Load current cursor position
             std::cout << CSI_S"u";
@@ -353,7 +390,9 @@ namespace field
             // get input from the console
             io::console_input >> input;
             playfield_handle_input(*this, input);
-            exit_code = handle_exit(input);
+
+            if(this->exit_code != 0) break;
+            this->exit_code = handle_exit(input);
         }
 
         return exit_code;

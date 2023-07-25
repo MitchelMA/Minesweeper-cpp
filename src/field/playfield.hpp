@@ -17,6 +17,7 @@ namespace field
     struct Playfield
     {
     public:
+        int exit_code;
         bool gameover;
         std::uint32_t bombpercentage;
         std::size_t seed;
@@ -27,11 +28,13 @@ namespace field
 
         static tools::Result<std::unique_ptr<Playfield>> from_file(std::string file_name) noexcept;
         [[nodiscard]]
-        tools::Result<int> write_to_file(std::string file_name, int save_cells) const noexcept;
+        tools::Result<int> write_to_file(std::string file_name, bool save_cells) const noexcept;
         int set_cells(byte* bytes, std::size_t byte_count) noexcept;
         void set_cells() noexcept;
         [[nodiscard]]
         std::string as_text() const noexcept;
+        [[nodiscard]]
+        std::string peek() const noexcept;
         void open_series(std::size_t x, std::size_t y) noexcept;
         [[nodiscard]]
         bool eval() const noexcept;
@@ -41,7 +44,8 @@ namespace field
          * Reasons for exiting:\n
          * 1: User-requested exit.\n
          * 2: Game-over.\n
-         * 3: Game-win.
+         * 3: Game-win.\n
+         * 4: Error.
          */
         [[nodiscard]]
         int run() noexcept;
@@ -54,7 +58,7 @@ namespace field
          * 0: Nothing.\n
          * 1: User-requested exit.\n
          * 2: Game-over.\n
-         * 3: Game-win
+         * 3: Game-win.\n
          */
         [[nodiscard]]
         int handle_exit(const io::ConsoleInputValue& input_value) const noexcept;
