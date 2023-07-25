@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include "playfield.hpp"
+#include "../tools/ansi.hpp"
 
 static FILE* save_file;
 
@@ -43,12 +44,15 @@ static FILE* save_file;
         OSTREAM << "\x1b[0m";                                                    \
     } while(0)
 
+void playfield_handle_input(field::Playfield& field, const io::ConsoleInputValue& input_value) noexcept;
+bool handle_arrows(field::Playfield& field, const io::ConsoleInputValue& arrow) noexcept;
+bool handle_open(field::Playfield& field, const io::ConsoleInputValue& input) noexcept;
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
 
 namespace field
 {
 
-    tools::Result<std::unique_ptr<Playfield>> 
+    tools::Result<std::unique_ptr<Playfield>>
     Playfield::from_file(
         std::string file_name
     ) noexcept
@@ -58,7 +62,7 @@ namespace field
         if(save_file == nullptr)
             return new std::runtime_error(
                 std::format("Couldn't open file \"{}\"", file_name));
-        
+
         auto field = std::make_unique<Playfield>();
 
         int has_save = 0;
@@ -87,7 +91,7 @@ namespace field
         if(read_count != field->size * field->size)
             return new std::runtime_error(
                 std::format(
-                    "Could only read {} bytes of data where there should have been {} bytes of data", 
+                    "Could only read {} bytes of data where there should have been {} bytes of data",
                     read_count, field->size * field->size
                 )
             );
@@ -106,7 +110,7 @@ namespace field
 
         if(cells.get() != nullptr)
             return 1;
-            
+
         cells = std::make_unique<std::unique_ptr<Cell[]>[]>(size);
         for(std::size_t i = 0; i < size; i++)
         {
@@ -153,7 +157,8 @@ namespace field
     }
 
     std::string
-    Playfield::as_text() const noexcept
+    Playfield::as_text()
+    const noexcept
     {
         std::ostringstream buffer;
         static const std::string ANSI_COLOURS[9] = {
@@ -206,6 +211,56 @@ namespace field
         return buffer.str();
     }
 
+    void
+    Playfield::open_series(std::size_t x, std::size_t y)
+    noexcept
+    {
+        // Todo! write open series for opening cells
+    }
+
+    int
+    Playfield::run()
+    noexcept
+    {
+        static io::ConsoleInputValue input;
+        int exit_code = 0;
+
+        while(exit_code == 0)
+        {
+            // Load current cursor position
+            std::cout << CSI_S"u";
+            // Save current cursor position
+            std::cout << CSI_S"s";
+
+            // Print the current game-state to stdout
+            std::cout << this->as_text();
+
+            // get input from the console
+            io::console_input >> input;
+            playfield_handle_input(*this, input);
+            exit_code = handle_exit(input);
+        }
+
+        return exit_code;
+    }
+
+    int
+    Playfield::handle_exit(
+           const io::ConsoleInputValue& input_value
+    ) const noexcept
+    {
+        if(this->gameover)
+            return 2;
+
+        if (input_value == io::ConsoleInputValue{'q'} ||
+                input_value == io::key_esc)
+        {
+            return 1;
+        }
+
+        return 0;
+    }
+
 } // namespace field
 
 void
@@ -252,4 +307,71 @@ noexcept
     {
         field.cells[y + 1][x + 1].neighbours_++;
     }
+}
+
+void
+playfield_handle_input(
+        field::Playfield& field,
+        const io::ConsoleInputValue& input_value
+) noexcept
+{
+    handle_arrows(field, input_value);
+    handle_open(field, input_value);
+}
+
+bool
+handle_arrows(
+        field::Playfield& field,
+        const io::ConsoleInputValue& arrow
+) noexcept
+{
+    if (arrow == io::key_arrow_up)
+    {
+        if(field.caret_y > 0)
+            field.caret_y--;
+        else
+            field.caret_y = field.size - 1;
+
+        return true;
+    }
+
+    if(arrow == io::key_arrow_right)
+    {
+        if(field.caret_x < field.size - 1)
+            field.caret_x++;
+        else
+            field.caret_x = 0;
+
+        return true;
+    }
+
+    if(arrow == io::key_arrow_down)
+    {
+        if(field.caret_y < field.size - 1)
+            field.caret_y++;
+        else
+            field.caret_y = 0;
+
+        return true;
+    }
+
+    if(arrow == io::key_arrow_left)
+    {
+        if(field.caret_x > 0)
+            field.caret_x--;
+        else
+            field.caret_x = field.size - 1;
+
+        return true;
+    }
+
+    return false;
+}
+
+bool handle_open(
+        field::Playfield& field,
+        const io::ConsoleInputValue& input
+) noexcept
+{
+    //Todo! write conditions on when to open cell and when game-over!
 }

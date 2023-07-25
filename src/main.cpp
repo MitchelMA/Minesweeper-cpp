@@ -34,8 +34,8 @@ int main(int argc, const char* argv[])
 
     std::cout << "Seed: " << playfield->seed << "\n\n";
 
-    std::cout << playfield->as_text();
-    io::console_input >> input;
+    // run the main-loop
+    int exit_code = playfield->run();
 
     // Exit alternative buffer
     std::cout << CSI_S"?1049l";

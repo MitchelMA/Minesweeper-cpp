@@ -25,7 +25,9 @@ namespace io
 
     #endif // os-check
 
+        [[nodiscard]]
         std::uint64_t get_value() const noexcept;
+        [[nodiscard]]
         bool is_special() const noexcept;
 
         bool operator==(const ConsoleInputValue& other) const noexcept;

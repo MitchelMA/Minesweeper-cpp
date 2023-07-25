@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "../tools/Result/result.hpp"
+#include "../tools/consoleinput.hpp"
 #include "cell.hpp"
 
 #define STAND_FIELD_SIZE 30
@@ -15,9 +16,6 @@ namespace field
 {
     struct Playfield
     {
-    private:
-        std::size_t s_cursor_x_;
-        std::size_t s_cursor_y_;
     public:
         bool gameover;
         std::uint32_t bombpercentage;
@@ -30,8 +28,30 @@ namespace field
         static tools::Result<std::unique_ptr<Playfield>> from_file(std::string file_name) noexcept;
         int set_cells(byte* bytes, std::size_t byte_count) noexcept;
         void set_cells() noexcept;
-        [[nodiscard("Returned string is encouraged to be used.")]]
+        [[nodiscard]]
         std::string as_text() const noexcept;
+        void open_series(std::size_t x, std::size_t y) noexcept;
+        /**
+         * Main-loop of the game
+         * @return
+         * Reasons for exiting:\n
+         * 1: User-requested exit\n
+         * 2: Game-over\n
+         */
+        [[nodiscard]]
+        int run() noexcept;
+
+    private:
+        /**
+         * Handles exit-conditions:\n
+         * @param input_value
+         * @return
+         * 0: Nothing.\n
+         * 1: User-requested exit.\n
+         * 2: Game-over.
+         */
+        [[nodiscard]]
+        int handle_exit(const io::ConsoleInputValue& input_value) const noexcept;
     };
 }
 
