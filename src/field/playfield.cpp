@@ -47,6 +47,7 @@ static FILE* save_file;
 void playfield_handle_input(field::Playfield& field, const io::ConsoleInputValue& input_value) noexcept;
 bool handle_arrows(field::Playfield& field, const io::ConsoleInputValue& arrow) noexcept;
 bool handle_open(field::Playfield& field, const io::ConsoleInputValue& input) noexcept;
+bool handle_flag(field::Playfield& field, const io::ConsoleInputValue& input) noexcept;
 void cell_set_bomb(field::Playfield& field, std::size_t x, std::size_t y) noexcept;
 
 namespace field
@@ -99,6 +100,15 @@ namespace field
         field->set_cells(bytes.get(), field->size*field->size);
 
         return field;
+    }
+
+    tools::Result<int>
+    Playfield::write_to_file(
+            std::string file_name,
+            int save_cells
+    ) const noexcept
+    {
+
     }
 
     int
@@ -215,7 +225,46 @@ namespace field
     Playfield::open_series(std::size_t x, std::size_t y)
     noexcept
     {
-        // Todo! write open series for opening cells
+        if(x >= this->size || y >= this->size) return;
+
+        Cell& cell = this->cells[y][x];
+        if(cell.is_flag(field::cell_flagged)) return;
+        if(cell.is_flag(field::cell_opened)) return;
+
+        cell.open();
+        if(cell.neighbours_ > 0) return;
+
+        open_series(x - 1, y - 1);
+        open_series(x, y - 1);
+        open_series(x + 1, y - 1);
+        open_series(x - 1, y);
+        open_series(x + 1, y);
+        open_series(x - 1, y + 1);
+        open_series(x, y + 1);
+        open_series(x + 1, y + 1);
+    }
+
+    bool
+    Playfield::eval()
+    const noexcept
+    {
+        for(std::size_t y = 0; y < this->size; y++)
+        {
+            for(std::size_t x = 0; x < this->size; x++)
+            {
+                Cell& cell = this->cells[y][x];
+                if(cell.is_flag(field::cell_bomb) && !cell.is_flag(field::cell_flagged))
+                {
+                    return false;
+                }
+                if(!cell.is_flag(field::cell_bomb) && !cell.is_flag(field::cell_opened))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     int
@@ -225,12 +274,13 @@ namespace field
         static io::ConsoleInputValue input;
         int exit_code = 0;
 
+        // Save current cursor position
+        std::cout << CSI_S"s";
+
         while(exit_code == 0)
         {
             // Load current cursor position
             std::cout << CSI_S"u";
-            // Save current cursor position
-            std::cout << CSI_S"s";
 
             // Print the current game-state to stdout
             std::cout << this->as_text();
@@ -251,6 +301,9 @@ namespace field
     {
         if(this->gameover)
             return 2;
+
+        if(this->eval())
+            return 3;
 
         if (input_value == io::ConsoleInputValue{'q'} ||
                 input_value == io::key_esc)
@@ -317,6 +370,7 @@ playfield_handle_input(
 {
     handle_arrows(field, input_value);
     handle_open(field, input_value);
+    handle_flag(field, input_value);
 }
 
 bool
@@ -373,5 +427,24 @@ bool handle_open(
         const io::ConsoleInputValue& input
 ) noexcept
 {
-    //Todo! write conditions on when to open cell and when game-over!
+    if(input != io::key_space && input != io::key_enter)
+        return false;
+
+    field::Cell& cell = field.cells[field.caret_y][field.caret_x];
+    field.open_series(field.caret_x, field.caret_y);
+    if(cell.is_flag(field::cell_bomb) && cell.is_flag(field::cell_opened))
+        field.gameover = true;
+
+    return true;
+}
+
+bool
+handle_flag(
+        field::Playfield& field,
+        const io::ConsoleInputValue& input)
+noexcept
+{
+    if(input != io::ConsoleInputValue{'f'}) return false;
+    field::Cell& cell = field.cells[field.caret_y][field.caret_x];
+    return cell.flag();
 }

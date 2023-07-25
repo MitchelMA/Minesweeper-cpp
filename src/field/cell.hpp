@@ -26,6 +26,8 @@ namespace field
         byte to_byte() const noexcept;
         [[nodiscard("Returned boolean is encouraged to be used.")]]
         bool is_flag(std::uint32_t flag) const noexcept;
+        bool open() noexcept;
+        bool flag() noexcept;
     };
 
 } // namespace field

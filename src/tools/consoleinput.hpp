@@ -82,6 +82,7 @@ namespace io
 
     constexpr ConsoleInputValue key_esc   {27};
     constexpr ConsoleInputValue key_space {32};
+    constexpr ConsoleInputValue key_enter {13};
 
 } // namespace io
 

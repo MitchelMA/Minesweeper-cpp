@@ -29,4 +29,22 @@ namespace field
         return value_ & flag;
     }
 
+    bool
+    Cell::open()
+    noexcept
+    {
+        if(this->is_flag(field::cell_flagged)) return false;
+        this->value_ |= field::cell_opened;
+        return true;
+    }
+
+    bool
+    Cell::flag()
+    noexcept
+    {
+        if(this->is_flag(field::cell_opened)) return false;
+        this->value_ ^= field::cell_flagged;
+        return true;
+    }
+
 } // namespace field
