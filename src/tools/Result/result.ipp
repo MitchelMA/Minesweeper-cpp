@@ -42,8 +42,8 @@ Result<TValue>::Result(
 template <typename TValue>
 constexpr bool
 Result<TValue>::match(
-    std::function<void(TValue&&)> success,
-    std::function<void(const std::exception*)> failure
+    const std::function<void(TValue&&)>& success,
+    const std::function<void(const std::exception*)>& failure
 )
 {
     if(is_used_)
@@ -62,8 +62,8 @@ Result<TValue>::match(
 template <typename TValue>
 constexpr bool
 Result<TValue>::match(
-    std::function<void(const TValue&&)> success,
-    std::function<void(const std::exception*)> failure
+    const std::function<void(const TValue&&)>& success,
+    const std::function<void(const std::exception*)>& failure
 ) const
 {
     if(is_used_)

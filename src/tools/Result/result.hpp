@@ -39,12 +39,12 @@ namespace tools
         ~Result() noexcept = default;
 
         constexpr bool match(
-            std::function<void(TValue&&)> success,
-            std::function<void(const std::exception*)> failure
+            const std::function<void(TValue&&)>& success,
+            const std::function<void(const std::exception*)>& failure
         );
         constexpr bool match(
-            std::function<void(const TValue&&)> success,
-            std::function<void(const std::exception*)> failure
+            const std::function<void(const TValue&&)>& success,
+            const std::function<void(const std::exception*)>& failure
         ) const;
 
         TValue& unpack();
@@ -79,16 +79,16 @@ namespace tools
         ~Result() noexcept = default;
 
         constexpr bool match(
-            std::function<void(std::unique_ptr<TValue>)> success,
-            std::function<void(const std::exception*)> failure
+            const std::function<void(std::unique_ptr<TValue>)>& success,
+            const std::function<void(const std::exception*)>& failure
         );
         constexpr bool match(
-            std::function<void(TValue*)> success,
-            std::function<void(const std::exception*)> failure
+            const std::function<void(TValue*)>& success,
+            const std::function<void(const std::exception*)>& failure
         ) const;
         constexpr bool match_r(
-            std::function<void(TValue*)> success,
-            std::function<void(const std::exception*)> failure
+           const std::function<void(TValue*)>& success,
+           const std::function<void(const std::exception*)>& failure
         );
 
         std::unique_ptr<TValue> unpack();

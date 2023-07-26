@@ -51,8 +51,8 @@ Result<std::unique_ptr<TValue>>::Result(
 template <typename TValue>
 constexpr bool
 Result<std::unique_ptr<TValue>>::match(
-    std::function<void(std::unique_ptr<TValue>)> success,
-    std::function<void(const std::exception*)> failure
+    const std::function<void(std::unique_ptr<TValue>)>& success,
+    const std::function<void(const std::exception*)>& failure
 )
 {
     if(is_used_)
@@ -72,8 +72,8 @@ Result<std::unique_ptr<TValue>>::match(
 template <typename TValue>
 constexpr bool
 Result<std::unique_ptr<TValue>>::match(
-    std::function<void(TValue*)> success,
-    std::function<void(const std::exception*)> failure
+    const std::function<void(TValue*)>& success,
+    const std::function<void(const std::exception*)>& failure
 ) const
 {
     if(is_used_)
@@ -92,8 +92,8 @@ Result<std::unique_ptr<TValue>>::match(
 template <typename TValue>
 constexpr bool
 Result<std::unique_ptr<TValue>>::match_r(
-    std::function<void(TValue*)> success,
-    std::function<void(const std::exception*)> failure
+    const std::function<void(TValue*)>& success,
+    const std::function<void(const std::exception*)>& failure
 )
 {
     if(is_used_)
