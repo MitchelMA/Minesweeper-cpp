@@ -12,6 +12,9 @@
 #define STAND_FIELD_SIZE 30
 #define STAND_BOMB_PERCENTAGE 10
 
+#define FIELD_PRINT_X "1"
+#define FIELD_PRINT_Y "3"
+
 namespace field
 {
     struct Playfield

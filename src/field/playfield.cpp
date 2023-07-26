@@ -376,16 +376,13 @@ namespace field
         static io::ConsoleInputValue input;
         this->exit_code = 0;
 
-        // Save current cursor position
-        std::cout << CSI_S"s";
-
         while(this->exit_code == 0)
         {
             // Load current cursor position
-            std::cout << CSI_S"u";
+            std::cout << CSI_S FIELD_PRINT_Y ";" FIELD_PRINT_X "H";
 
             // Print the current game-state to stdout
-            std::cout << this->as_text();
+            std::cout << this->as_text() << "\n";
 
             // get input from the console
             io::console_input >> input;

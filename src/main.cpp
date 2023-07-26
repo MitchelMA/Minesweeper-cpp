@@ -150,7 +150,7 @@ void
 handle_user_exit()
 noexcept
 {
-    std::cout << "\nBedankt voor het spelen van Minesweeper!" << std::endl;
+    std::cout << "Bedankt voor het spelen van Minesweeper!" << std::endl;
     handle_write(*playfield, true);
 }
 
@@ -158,7 +158,7 @@ void
 handle_gameover()
 noexcept
 {
-    std::cout << CSI_S"u";
+    std::cout << CSI_S FIELD_PRINT_Y ";" FIELD_PRINT_X "H";
     std::cout << playfield->peek() << "\n\n";
     std::cout << "Wat jammer, je raakte een bom!" << std::endl;
     handle_write(*playfield, false);
@@ -168,7 +168,7 @@ void
 handle_win()
 noexcept
 {
-    std::cout << CSI_S"u";
+    std::cout << CSI_S FIELD_PRINT_Y ";" FIELD_PRINT_X "H";
     std::cout << playfield->peek() << "\n\n";
     std::cout << "Je hebt gewonnen!!" << std::endl;
     handle_write(*playfield, false);
