@@ -182,7 +182,8 @@ noexcept
     handle_write(*playfield, true);
 }
 
-void handle_write(
+void
+handle_write(
         const field::Playfield& field,
         bool save_cells
 ) noexcept

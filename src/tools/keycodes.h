@@ -31,6 +31,8 @@
 #define KEYCODE_END    KEYCODE_UNSET
 #define KEYCODE_PGDN   KEYCODE_UNSET
 
+#define KEYCODE_ENTER  KEYCODE_UNSET
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32)
 
 #undef KEYCODE_ARROW_UP
@@ -58,6 +60,8 @@
 #undef KEYCODE_END
 #undef KEYCODE_PGDN
 
+#undef KEYCODE_ENTER
+
 // ---------------------- //
 
 #define KEYCODE_ARROW_UP    72, true
@@ -84,6 +88,8 @@
 #define KEYCODE_DEL    83, true
 #define KEYCODE_END    79, true
 #define KEYCODE_PGDN   81, true
+
+#define KEYCODE_ENTER 13, false
 
 #elif defined(__linux__)
 
@@ -128,6 +134,8 @@
 #undef KEYCODE_END
 #undef KEYCODE_PGDN
 
+#undef KEYCODE_ENTER
+
 #undef KEYCODE_ARROW_UP
 #undef KEYCODE_ARROW_RIGHT
 #undef KEYCODE_ARROW_DOWN
@@ -170,6 +178,8 @@
 #define KEYCODE_DEL    SET_KEYCODE_4(27, 91, 51, 126)
 #define KEYCODE_END         SET_KEYCODE_3(27, 91, 70)
 #define KEYCODE_PGDN   SET_KEYCODE_4(27, 91, 54, 126)
+
+#define KEYCODE_ENTER               SET_KEYCODE_1(10)
 
 #endif // os-check
 
