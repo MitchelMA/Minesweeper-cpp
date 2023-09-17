@@ -11,7 +11,8 @@ namespace field
     noexcept
     {
         conversion c = {.b = byte};
-        *this = c.c;
+        value_ = c.c.value_;
+        neighbours_ = c.c.neighbours_;
     }
 
     byte
