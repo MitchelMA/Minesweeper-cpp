@@ -64,8 +64,7 @@ void init_field(int argc)
     if(argc > 1)
         return;
 
-    auto result = field::Playfield::from_file(save_file_location);
-    result.match(
+    field::Playfield::from_file(save_file_location).match(
         [](std::unique_ptr<field::Playfield> value) {
             value.swap(playfield);
             if(playfield->cells != nullptr)
@@ -88,7 +87,7 @@ void handle_argv(int argc, const char* argv[])
     std::stringstream ss;
     if(argc == 1)
         return;
-    
+
     if(argc > 1)
     {
         argv++;
@@ -184,20 +183,19 @@ noexcept
 
 void
 handle_write(
-        const field::Playfield& field,
-        bool save_cells
+    const field::Playfield& field,
+    bool save_cells
 ) noexcept
 {
-    auto result = field.write_to_file(save_file_location, save_cells);
-    result.match(
-            [](int && status)
-            {
-                std::cout << "Succesvol het spel opgeslagen met code: " << status << std::endl;
-            },
-            [](auto error)
-            {
-                std::cerr << "Something went wrong while trying to write to save-file: " << error->what() << std::endl;
-            }
+    field.write_to_file(save_file_location, save_cells).match(
+        [](const int && status)
+        {
+            std::cout << "Succesvol het spel opgeslagen met code: " << status << std::endl;
+        },
+        [](auto error)
+        {
+            std::cerr << "Something went wrong while trying to write to save-file: " << error->what() << std::endl;
+        }
     );
 }
 

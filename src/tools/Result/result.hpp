@@ -5,6 +5,7 @@
 #include <exception>
 #include <functional>
 #include <stdexcept>
+#include <optional>
 
 namespace tools
 {
@@ -16,7 +17,7 @@ namespace tools
         const bool is_failure_;
         bool is_used_ = false;
 
-        TValue value_;
+        std::optional<TValue> value_;
         std::unique_ptr<std::exception> failure_;
 
         auto throw_used() const -> void { 
@@ -36,6 +37,8 @@ namespace tools
             is_failure_(true) {};
         Result(const Result<TValue>& other);
         Result(Result<TValue>& other);
+        Result(const Result<TValue>&& other) noexcept(false);
+        Result(Result<TValue>&& other) noexcept(false);
         ~Result() noexcept = default;
 
         constexpr bool match(

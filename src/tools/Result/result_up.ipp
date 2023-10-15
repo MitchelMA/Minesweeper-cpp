@@ -60,12 +60,12 @@ Result<std::unique_ptr<TValue>>::match(
 
     if(is_failure_)
     {
-        failure(failure_.get());
+        std::invoke(std::forward<const std::function<void(const std::exception*)>&>(failure), failure_.get());
         return false;
     }
 
     is_used_ = true;
-    success(std::move(value_));
+    std::invoke(std::forward<const std::function<void(std::unique_ptr<TValue>)>&>(success), std::move(value_));
     return true;
 }
 
@@ -81,11 +81,11 @@ Result<std::unique_ptr<TValue>>::match(
 
     if(is_failure_)
     {
-        failure(failure_.get());
+        std::invoke(std::forward<const std::function<void(const std::exception*)>&>(failure), failure_.get());
         return false;
     }
 
-    success(value_.get());
+    std::invoke(std::forward<const std::function<void(TValue*)>&>(success), std::move(value_));
     return true;
 }
 
@@ -101,12 +101,12 @@ Result<std::unique_ptr<TValue>>::match_r(
 
     if(is_failure_)
     {
-        failure(failure_.get());
+        std::invoke(std::forward<const std::function<void(const std::exception*)>&>(failure), failure_.get());
         return false;
     }
 
     is_used_ = true;
-    success(value_.release());
+    std::invoke(std::forward<const std::function<void(TValue*)>&>(success), value_.release());
     return true;
 }
 

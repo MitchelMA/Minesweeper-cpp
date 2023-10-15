@@ -6,18 +6,13 @@ Result<TValue>::Result(
     const Result<TValue>& other
 ) :
     is_failure_(other.is_failure_),
-    is_used_(other.is_used_)
+    is_used_(other.is_used_),
+    value_(std::move(other.value_))
 {
-    if(is_used_) throw_used();
-    else other.is_used_ = true;
+    if (is_used_) throw_used();
 
-    if(is_failure_)
-    {
-        failure_ = std::move(other.failure_);
-        return;
-    }
-
-    value_ = other.value_;
+    if (is_failure_)
+        failure_ = std::make_unique<std::exception>(std::forward<std::exception>(*other.failure_));
 }
 
 template <typename TValue>
@@ -25,18 +20,43 @@ Result<TValue>::Result(
     Result<TValue>& other
 ) :
     is_failure_(other.is_failure_),
-    is_used_(other.is_used_)
+    is_used_(other.is_used_),
+    value_(std::move(other.value_))
 {
-    if(is_used_) throw_used();
+    if (is_used_) throw_used();
+
+    if (is_failure_)
+        failure_ = std::make_unique<std::exception>(std::forward<std::exception>(*other.failure_));
+}
+
+template <typename TValue>
+Result<TValue>::Result(
+    const Result<TValue>&& other
+) :
+    is_failure_(other.is_failure_),
+    is_used_(other.is_used_),
+    value_(std::move(other.value_))
+{
+    if (is_used_) throw_used();
     else other.is_used_ = true;
 
-    if(is_failure_)
-    {
-        failure_ = std::move(other.failure_);
-        return;
-    }
+    if (is_failure_)
+        failure_ = std::make_unique<std::exception>(std::forward<std::exception>(*other.failure_));
+}
 
-    value_ = other.value_;
+template <typename TValue>
+Result<TValue>::Result(
+    Result<TValue>&& other
+) :
+    is_failure_(other.is_failure_),
+    is_used_(other.is_used_),
+    value_(std::move(other.value_))
+{
+    if (is_used_) throw_used();
+    else other.is_used_ = true;
+
+    if (is_failure_)
+        failure_ = std::make_unique<std::exception>(std::forward<std::exception>(*other.failure_));
 }
 
 template <typename TValue>
@@ -51,11 +71,11 @@ Result<TValue>::match(
 
     if(is_failure_)
     {
-        failure(failure_.get());
+        std::invoke(std::forward<const std::function<void(const std::exception*)>&>(failure), failure_.get());
         return false;
     }
 
-    success(std::move(value_));
+    std::invoke(std::forward<const std::function<void(TValue&&)>&>(success), std::forward<TValue>(value_.value()));
     return true;
 }
 
@@ -71,11 +91,11 @@ Result<TValue>::match(
 
     if(is_failure_)
     {
-        failure(failure_.get());
+        std::invoke(std::forward<const std::function<void(const std::exception*)>&>(failure), failure_.get());
         return false;
     }
 
-    success(std::move(value_));
+    std::invoke(std::forward<const std::function<void(const TValue&&)>&>(success), std::forward<const TValue>(value_.value()));
     return true;
 }
 
@@ -88,7 +108,7 @@ Result<TValue>::unpack()
     if(is_failure_)
         throw std::exception(*failure_);
 
-    return value_;
+    return value_.value();
 }
 
 template <typename TValue>
@@ -101,7 +121,7 @@ const
     if(is_failure_)
         throw std::exception(*failure_);
 
-    return value_;
+    return value_.value();
 }
 
 template <typename TValue>
