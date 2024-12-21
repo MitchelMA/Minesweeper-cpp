@@ -31,21 +31,6 @@ Result<TValue>::Result(
 
 template <typename TValue>
 Result<TValue>::Result(
-    const Result<TValue>&& other
-) :
-    is_failure_(other.is_failure_),
-    is_used_(other.is_used_),
-    value_(std::move(other.value_))
-{
-    if (is_used_) throw_used();
-    else other.is_used_ = true;
-
-    if (is_failure_)
-        failure_ = std::make_unique<std::exception>(std::forward<std::exception>(*other.failure_));
-}
-
-template <typename TValue>
-Result<TValue>::Result(
     Result<TValue>&& other
 ) :
     is_failure_(other.is_failure_),

@@ -12,25 +12,6 @@ Result<std::unique_ptr<TValue>>::Result(
 
 template <typename TValue>
 Result<std::unique_ptr<TValue>>::Result(
-    const Result<std::unique_ptr<TValue>>& other
-) :
-    is_failure_(other.is_failure_),
-    is_used_(other.is_used_)
-{
-    if(is_used_) throw_used();
-    else other.is_used_ = true;
-
-    if(is_failure_)
-    {
-        failure_ = std::move(other.failure_);
-        return;
-    }
-    
-    value_ = std::move(other.value_);
-}
-
-template <typename TValue>
-Result<std::unique_ptr<TValue>>::Result(
     Result<std::unique_ptr<TValue>>& other
 ) :
     is_failure_(other.is_failure_),

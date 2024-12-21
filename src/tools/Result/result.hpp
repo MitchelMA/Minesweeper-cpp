@@ -37,7 +37,7 @@ namespace tools
             is_failure_(true) {};
         Result(const Result<TValue>& other);
         Result(Result<TValue>& other);
-        Result(const Result<TValue>&& other) noexcept(false);
+        Result(const Result<TValue>&& other) = delete;
         Result(Result<TValue>&& other) noexcept(false);
         ~Result() noexcept = default;
 
@@ -77,7 +77,7 @@ namespace tools
             value_{},
             failure_(std::unique_ptr<std::exception>(exc)),
             is_failure_(true) {};
-        Result(const Result<std::unique_ptr<TValue>>& other);
+        Result(const Result<std::unique_ptr<TValue>>& other) = delete;
         Result(Result<std::unique_ptr<TValue>>& other);
         ~Result() noexcept = default;
 
